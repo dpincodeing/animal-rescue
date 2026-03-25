@@ -62,6 +62,8 @@ const generateDemoResponse = (body) => {
         responder_type:    'ngo',
         specializations:   ['dogs', 'cats'],
         distance_metres:   850,
+        latitude:          parseFloat(body.latitude) + 0.005,
+        longitude:         parseFloat(body.longitude) + 0.005,
       },
       {
         responder_id:      uuidv4(),
@@ -73,6 +75,8 @@ const generateDemoResponse = (body) => {
         responder_type:    'vet',
         specializations:   ['dogs', 'cats', 'birds'],
         distance_metres:   2100,
+        latitude:          parseFloat(body.latitude) - 0.015,
+        longitude:         parseFloat(body.longitude) + 0.01,
       },
       {
         responder_id:      uuidv4(),
@@ -84,6 +88,8 @@ const generateDemoResponse = (body) => {
         responder_type:    'volunteer',
         specializations:   ['dogs'],
         distance_metres:   3400,
+        latitude:          parseFloat(body.latitude) + 0.02,
+        longitude:         parseFloat(body.longitude) - 0.02,
       },
     ],
   };

@@ -51,6 +51,8 @@ const findNearbyResponders = async (latitude, longitude, radiusMetres = 5000) =>
       rp.organization_name,
       rp.responder_type,
       rp.specializations,
+      ST_Y(u.last_known_location::geometry) AS latitude,
+      ST_X(u.last_known_location::geometry) AS longitude,
       ST_Distance(
         u.last_known_location,
         ST_MakePoint($1, $2)::geography

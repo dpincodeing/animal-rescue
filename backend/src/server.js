@@ -18,6 +18,7 @@ const cors = require('cors');
 require('dotenv').config(); // Load .env variables into process.env
 
 const reportRoutes = require('./routes/reports');
+const responderRoutes = require('./routes/responders');
 const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 
@@ -47,6 +48,7 @@ app.get('/api/health', (_req, res) => {
 // ── Route modules ───────────────────────────────────────────────────────────
 // All report-related endpoints live under /api/reports
 app.use('/api/reports', reportRoutes);
+app.use('/api/responders', responderRoutes);
 
 // ── Global error handler (MUST be registered last) ──────────────────────────
 app.use(errorHandler);

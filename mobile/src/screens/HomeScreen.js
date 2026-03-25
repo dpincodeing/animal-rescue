@@ -1,8 +1,8 @@
 // =============================================================================
-// screens/HomeScreen.js — Compassionate Redesign
+// screens/HomeScreen.js — Compassionate Redesign + Directory
 // =============================================================================
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,21 +10,25 @@ import {
   StyleSheet,
   Platform,
   Image,
+  TouchableOpacity,
+  ActivityIndicator
 } from 'react-native';
 import { useLocation } from '../hooks/useLocation';
 import { useReportSubmission } from '../hooks/useReportSubmission';
+import { useNearbyResponders } from '../hooks/useNearbyResponders';
 import ReportEmergencyButton from '../components/ReportEmergencyButton';
+import RespondersList from '../components/RespondersList';
 
 // ── Colors ──────────────────────────────────────────────────────────────────
 const COLORS = {
-  background: '#FFF9F0',     // Warm neutral
-  surface: '#FFFFFF',        // Pure white cards
-  primary: '#FF7F50',        // Coral / Orange
-  success: '#4CA57C',        // Calming green
-  textDark: '#333333',       // Main text
-  textMedium: '#666666',     // Subtitles
-  textLight: '#999999',      // Meta text
-  border: '#F0E6D2',         // Soft borders
+  background: '#FFF9F0',     
+  surface: '#FFFFFF',        
+  primary: '#FF7F50',        
+  success: '#4CA57C',        
+  textDark: '#333333',       
+  textMedium: '#666666',     
+  textLight: '#999999',      
+  border: '#F0E6D2',         
 };
 
 const FONT_FAMILY = Platform.select({
@@ -47,8 +51,24 @@ const HomeScreen = () => {
     isSubmitting,
     submitError,
     currentReport,
-    nearbyResponders,
+    nearbyResponders: emergencyResponders,
   } = useReportSubmission();
+
+  const {
+    fetchResponders,
+    responders: directoryResponders,
+    isFetching: isFetchingDirectory,
+    error: directoryError
+  } = useNearbyResponders();
+
+  const [showDirectory, setShowDirectory] = useState(false);
+
+  // Automatically fetch directory if user opened directory tab and location becomes available
+  useEffect(() => {
+    if (showDirectory && location) {
+      fetchResponders(location.latitude, location.longitude);
+    }
+  }, [showDirectory, location, fetchResponders]);
 
   const handleSubmitReport = async () => {
     if (!location) return;
@@ -60,6 +80,13 @@ const HomeScreen = () => {
       urgency: 'critical',
       address: address || undefined,
     });
+  };
+
+  const handleOpenDirectory = () => {
+    setShowDirectory(true);
+    if (location) {
+      fetchResponders(location.latitude, location.longitude);
+    }
   };
 
   return (
@@ -78,7 +105,7 @@ const HomeScreen = () => {
       </View>
 
       <View style={s.contentWrapper}>
-        {/* ── Main Report Action ──────────────────────────────────────────────── */}
+        {/* ── Emergency Report Action ─────────────────────────────────────────── */}
         <View style={s.card}>
           <ReportEmergencyButton
             onFetchLocation={fetchLocation}
@@ -107,7 +134,7 @@ const HomeScreen = () => {
 
             <View style={s.statsRow}>
               <View style={s.statBox}>
-                <Text style={s.statVal}>{nearbyResponders.length}</Text>
+                <Text style={s.statVal}>{emergencyResponders.length}</Text>
                 <Text style={s.statLabel}>Responders{'\n'}Notified</Text>
               </View>
               <View style={s.statBox}>
@@ -118,34 +145,49 @@ const HomeScreen = () => {
           </View>
         )}
 
-        {/* ── Nearby Responders List (Only shows if there are any) ────────────── */}
-        {nearbyResponders.length > 0 && (
+        {/* ── Directory: Find Responders (No Emergency) ─────────────────────── */}
+        {!currentReport && (
           <View style={s.card}>
-            <Text style={s.cardTitle}>Local Heroes Nearby</Text>
+            <Text style={s.cardTitle}>Local Directory</Text>
             <Text style={s.cardSubtitle}>
-              These compassionate organizations have been alerted and are reviewing your distress call.
+              Looking for a nearby Vet Clinic or Animal Shelter? Browse our local directory without triggering an emergency dispatch.
             </Text>
+            
+            {!showDirectory ? (
+              <TouchableOpacity style={s.directoryBtn} onPress={handleOpenDirectory}>
+                <Text style={s.directoryBtnText}>🔍 Find Vets & NGOs Near Me</Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={s.directoryContainer}>
+                {!location && (
+                  <View style={s.locationPrompt}>
+                    <Text style={s.locationText}>Please acquire your GPS location above to see nearby responders.</Text>
+                    <TouchableOpacity style={s.locBtn} onPress={fetchLocation} disabled={isFetchingLocation}>
+                      {isFetchingLocation ? <ActivityIndicator color="#FFF" /> : <Text style={s.locBtnText}>📍 Get Location</Text>}
+                    </TouchableOpacity>
+                  </View>
+                )}
+                
+                {isFetchingDirectory && (
+                   <View style={s.loadingBox}>
+                     <ActivityIndicator color={COLORS.primary} />
+                     <Text style={s.loadingText}>Searching nearby area...</Text>
+                   </View>
+                )}
 
-            <View style={s.respondersList}>
-              {nearbyResponders.map((r, i) => (
-                <View key={r.responder_id || i} style={s.responderRow}>
-                  <View style={[s.avatar, { backgroundColor: r.responder_type === 'ngo' ? '#E8F5E9' : '#FFF3E0' }]}>
-                    <Text style={s.avatarEmoji}>
-                      {r.responder_type === 'ngo' ? '🐾' : r.responder_type === 'vet' ? '🩺' : '❤️'}
-                    </Text>
-                  </View>
-                  <View style={s.responderInfo}>
-                    <Text style={s.responderName}>{r.full_name}</Text>
-                    <Text style={s.responderType}>
-                      {r.responder_type === 'ngo' ? 'Animal Rescue Org' : r.responder_type === 'vet' ? 'Veterinary Clinic' : 'Local Volunteer'}
-                    </Text>
-                  </View>
-                  <View style={s.distanceBadge}>
-                    <Text style={s.distanceText}>{Math.round(r.distance_metres)}m</Text>
-                  </View>
-                </View>
-              ))}
-            </View>
+                {directoryError && (
+                  <Text style={s.errorText}>⚠ {directoryError}</Text>
+                )}
+
+                {!isFetchingDirectory && location && directoryResponders.length > 0 && (
+                  <RespondersList responders={directoryResponders} />
+                )}
+
+                {!isFetchingDirectory && location && directoryResponders.length === 0 && (
+                  <Text style={s.emptyText}>No responders found in your 5km radius.</Text>
+                )}
+              </View>
+            )}
           </View>
         )}
       </View>
@@ -166,11 +208,9 @@ const s = StyleSheet.create({
     paddingBottom: 60,
   },
   
-  // ── Hero Section ────────────────────────
   heroContainer: {
     width: '100%',
     height: 320,
-    position: 'relative',
     backgroundColor: COLORS.primary,
   },
   heroImage: {
@@ -184,8 +224,8 @@ const s = StyleSheet.create({
     left: 0,
     right: 0,
     padding: 24,
-    paddingBottom: 40, // More space to blend into content
-    backgroundColor: 'rgba(0,0,0,0.4)', // Soft gradient-like darkening
+    paddingBottom: 40, 
+    backgroundColor: 'rgba(0,0,0,0.4)', 
   },
   appTitle: {
     fontFamily: FONT_FAMILY,
@@ -206,24 +246,21 @@ const s = StyleSheet.create({
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 4,
-    maxWidth: '90%',
   },
 
-  // ── Content Layout ──────────────────────
   contentWrapper: {
-    marginTop: -20, // Pulls content up over the hero slightly
+    marginTop: -20, 
     paddingHorizontal: 16,
     gap: 16,
-    alignItems: 'center', // Centers web content gracefully
+    alignItems: 'center', 
   },
 
-  // ── Cards ───────────────────────────────
   card: {
     backgroundColor: COLORS.surface,
     borderRadius: 24,
     padding: 24,
     width: '100%',
-    maxWidth: 600, // Limit width on large screens (Web layout support)
+    maxWidth: 600, 
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.05,
@@ -251,7 +288,6 @@ const s = StyleSheet.create({
     marginBottom: 20,
   },
 
-  // ── Mission Block ───────────────────────
   missionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -299,54 +335,73 @@ const s = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // ── Responders List ─────────────────────
-  respondersList: {
-    gap: 16,
-  },
-  responderRow: {
-    flexDirection: 'row',
+  directoryBtn: {
+    backgroundColor: '#FFF0E6',
+    paddingVertical: 16,
+    borderRadius: 16,
     alignItems: 'center',
-    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: '#FFD1B3'
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 16,
-  },
-  avatarEmoji: {
-    fontSize: 24,
-  },
-  responderInfo: {
-    flex: 1,
-  },
-  responderName: {
+  directoryBtnText: {
     fontFamily: FONT_FAMILY,
     fontSize: 16,
     fontWeight: '700',
-    color: COLORS.textDark,
-    marginBottom: 4,
+    color: COLORS.primary
   },
-  responderType: {
-    fontFamily: FONT_FAMILY,
-    fontSize: 13,
-    color: COLORS.textMedium,
-    fontWeight: '500',
+  directoryContainer: {
+    marginTop: 8,
   },
-  distanceBadge: {
-    backgroundColor: '#FFF1E8',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+  locationPrompt: {
+    backgroundColor: '#FAFAFA',
+    padding: 16,
     borderRadius: 12,
+    alignItems: 'center',
   },
-  distanceText: {
-    color: COLORS.primary,
-    fontWeight: '800',
-    fontSize: 13,
+  locationText: {
+    fontFamily: FONT_FAMILY,
+    color: COLORS.textMedium,
+    textAlign: 'center',
+    marginBottom: 12,
   },
-
+  locBtn: {
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  locBtnText: {
+    fontFamily: FONT_FAMILY,
+    color: '#FFF',
+    fontWeight: '700',
+  },
+  loadingBox: {
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontFamily: FONT_FAMILY,
+    color: COLORS.textMedium,
+  },
+  errorText: {
+    fontFamily: FONT_FAMILY,
+    color: '#D32F2F',
+    backgroundColor: '#FFF0F0',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    fontWeight: '600'
+  },
+  emptyText: {
+    fontFamily: FONT_FAMILY,
+    color: COLORS.textMedium,
+    textAlign: 'center',
+    marginTop: 24,
+    marginBottom: 12,
+    fontStyle: 'italic'
+  },
   footerText: {
     fontFamily: FONT_FAMILY,
     fontSize: 14,

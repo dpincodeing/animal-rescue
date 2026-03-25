@@ -86,10 +86,25 @@ const submitReport = (reportData) => {
   });
 };
 
+/**
+ * Fetch nearby responders without creating an emergency report.
+ *
+ * @param {number} latitude  — GPS latitude
+ * @param {number} longitude — GPS longitude
+ * @param {number} radius    — Search radius in metres
+ * @returns {Promise<object>} — { success, data: [...] }
+ */
+const getNearbyResponders = (latitude, longitude, radius = 5000) => {
+  return request(`/api/responders/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`, {
+    method: 'GET',
+  });
+};
+
 // ── Export all API methods ───────────────────────────────────────────────────
 // Add new methods here as the API grows (e.g. getReports, updateSession, etc.)
 const api = {
   submitReport,
+  getNearbyResponders,
 };
 
 export default api;
