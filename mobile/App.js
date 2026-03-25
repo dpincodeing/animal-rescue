@@ -12,7 +12,7 @@ function App() {
   return (
     <ReportProvider>
       <View style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#FFF9F0" />
+        <StatusBar barStyle="dark-content" backgroundColor="#F9F9F7" />
         <HomeScreen />
       </View>
     </ReportProvider>
@@ -22,7 +22,7 @@ function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFF9F0', // Warm neutral background
+    backgroundColor: '#F9F9F7', // Premium Alabaster Background
     ...(Platform.OS === 'web' ? { minHeight: '100vh' } : {}),
   },
 });

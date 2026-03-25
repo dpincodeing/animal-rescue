@@ -1,5 +1,5 @@
 // =============================================================================
-// screens/HomeScreen.js — Compassionate Redesign + Directory
+// screens/HomeScreen.js — Premium Redesign
 // =============================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -21,20 +21,21 @@ import RespondersList from '../components/RespondersList';
 
 // ── Colors ──────────────────────────────────────────────────────────────────
 const COLORS = {
-  background: '#FFF9F0',     
-  surface: '#FFFFFF',        
-  primary: '#FF7F50',        
-  success: '#4CA57C',        
-  textDark: '#333333',       
-  textMedium: '#666666',     
-  textLight: '#999999',      
-  border: '#F0E6D2',         
+  background: '#F9F9F7',     // Alabaster
+  surface: '#FFFFFF',        // Pure White
+  primary: '#2C4C3B',        // Deep Forest Green
+  accent: '#C05A44',         // Terracotta
+  textDark: '#1C1C1E',       // Almost Black
+  textMedium: '#8A8A8E',     // Sleek Medium Grey
+  textLight: '#C7C7CC',      // Muted Border Grey
+  border: 'rgba(0,0,0,0.06)',         
 };
 
+// ── Premium Font Stack ──────────────────────────────────────────────────────
 const FONT_FAMILY = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  ios: 'Avenir Next',
+  android: 'sans-serif-light',
+  web: '-apple-system, BlinkMacSystemFont, "Avenir Next", "Helvetica Neue", Helvetica, sans-serif',
 });
 
 const HomeScreen = () => {
@@ -63,7 +64,6 @@ const HomeScreen = () => {
 
   const [showDirectory, setShowDirectory] = useState(false);
 
-  // Automatically fetch directory if user opened directory tab and location becomes available
   useEffect(() => {
     if (showDirectory && location) {
       fetchResponders(location.latitude, location.longitude);
@@ -92,20 +92,21 @@ const HomeScreen = () => {
   return (
     <ScrollView style={s.root} contentContainerStyle={s.mainContent}>
       
-      {/* ── Hero Image ────────────────────────────────────────────────────────── */}
+      {/* ── Premium Hero Section ──────────────────────────────────────────────── */}
       <View style={s.heroContainer}>
         <Image 
-          source={{ uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1000&auto=format&fit=crop' }} 
+          source={{ uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1200&auto=format&fit=crop' }} 
           style={s.heroImage} 
         />
-        <View style={s.heroOverlay}>
-          <Text style={s.appTitle}>Rescue Paws ♡</Text>
-          <Text style={s.appSubtitle}>Compassion in action. Help animals in need with a single tap.</Text>
-        </View>
+        <View style={s.heroOverlay} />
+      </View>
+
+      <View style={s.headerBlock}>
+        <Text style={s.appTitle}>Rescue Ops.</Text>
+        <Text style={s.appSubtitle}>Rapid response and care for local wildlife and domestic strays in distress.</Text>
       </View>
 
       <View style={s.contentWrapper}>
-        {/* ── Emergency Report Action ─────────────────────────────────────────── */}
         <View style={s.card}>
           <ReportEmergencyButton
             onFetchLocation={fetchLocation}
@@ -120,50 +121,47 @@ const HomeScreen = () => {
           />
         </View>
 
-        {/* ── Status & Mission Update (Only shows after reporting) ──────────── */}
         {currentReport && (
           <View style={[s.card, s.missionCard]}>
             <View style={s.missionHeaderRow}>
               <View style={s.successPulse} />
-              <Text style={s.cardTitle}>Help is on the way</Text>
+              <Text style={s.missionCardTitle}>Mission Received</Text>
             </View>
             <Text style={s.missionMsg}>
-              Your report <Text style={{fontWeight: '700'}}>#{currentReport.id?.substring(0, 6)}</Text> has been received. 
-              We've alerted local responders near your location!
+              Report <Text style={s.boldText}>#{currentReport.id?.substring(0, 6).toUpperCase()}</Text> is active. Local responders have been alerted.
             </Text>
 
             <View style={s.statsRow}>
               <View style={s.statBox}>
                 <Text style={s.statVal}>{emergencyResponders.length}</Text>
-                <Text style={s.statLabel}>Responders{'\n'}Notified</Text>
+                <Text style={s.statLabel}>NOTIFIED</Text>
               </View>
               <View style={s.statBox}>
                 <Text style={s.statVal}>Active</Text>
-                <Text style={s.statLabel}>Mission{'\n'}Status</Text>
+                <Text style={s.statLabel}>STATUS</Text>
               </View>
             </View>
           </View>
         )}
 
-        {/* ── Directory: Find Responders (No Emergency) ─────────────────────── */}
         {!currentReport && (
           <View style={s.card}>
             <Text style={s.cardTitle}>Local Directory</Text>
             <Text style={s.cardSubtitle}>
-              Looking for a nearby Vet Clinic or Animal Shelter? Browse our local directory without triggering an emergency dispatch.
+              Explore vetted clinics and non-profit organizations operating seamlessly in your vicinity.
             </Text>
             
             {!showDirectory ? (
               <TouchableOpacity style={s.directoryBtn} onPress={handleOpenDirectory}>
-                <Text style={s.directoryBtnText}>🔍 Find Vets & NGOs Near Me</Text>
+                <Text style={s.directoryBtnText}>Explore Local Responders</Text>
               </TouchableOpacity>
             ) : (
               <View style={s.directoryContainer}>
                 {!location && (
                   <View style={s.locationPrompt}>
-                    <Text style={s.locationText}>Please acquire your GPS location above to see nearby responders.</Text>
+                    <Text style={s.locationText}>Location services are required to browse the directory.</Text>
                     <TouchableOpacity style={s.locBtn} onPress={fetchLocation} disabled={isFetchingLocation}>
-                      {isFetchingLocation ? <ActivityIndicator color="#FFF" /> : <Text style={s.locBtnText}>📍 Get Location</Text>}
+                      {isFetchingLocation ? <ActivityIndicator color="#FFFFFF" /> : <Text style={s.locBtnText}>Enable Location</Text>}
                     </TouchableOpacity>
                   </View>
                 )}
@@ -171,12 +169,12 @@ const HomeScreen = () => {
                 {isFetchingDirectory && (
                    <View style={s.loadingBox}>
                      <ActivityIndicator color={COLORS.primary} />
-                     <Text style={s.loadingText}>Searching nearby area...</Text>
+                     <Text style={s.loadingText}>Synthesizing local networks...</Text>
                    </View>
                 )}
 
                 {directoryError && (
-                  <Text style={s.errorText}>⚠ {directoryError}</Text>
+                  <Text style={s.errorText}>{directoryError}</Text>
                 )}
 
                 {!isFetchingDirectory && location && directoryResponders.length > 0 && (
@@ -184,16 +182,13 @@ const HomeScreen = () => {
                 )}
 
                 {!isFetchingDirectory && location && directoryResponders.length === 0 && (
-                  <Text style={s.emptyText}>No responders found in your 5km radius.</Text>
+                  <Text style={s.emptyText}>No registered organizations found within a 5km radius.</Text>
                 )}
               </View>
             )}
           </View>
         )}
       </View>
-      
-      {/* ── Footer ───────────────────────────────────────────────────────────── */}
-      <Text style={s.footerText}>Thank you for being a voice for the voiceless. 🕊️</Text>
     </ScrollView>
   );
 };
@@ -205,211 +200,221 @@ const s = StyleSheet.create({
     backgroundColor: COLORS.background,
   },
   mainContent: {
-    paddingBottom: 60,
+    paddingBottom: 80,
   },
   
   heroContainer: {
     width: '100%',
-    height: 320,
+    height: 380,
     backgroundColor: COLORS.primary,
+    position: 'relative',
   },
   heroImage: {
     width: '100%',
     height: '100%',
-    opacity: 0.85,
+    opacity: 0.9,
   },
   heroOverlay: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    padding: 24,
-    paddingBottom: 40, 
-    backgroundColor: 'rgba(0,0,0,0.4)', 
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+
+  headerBlock: {
+    marginTop: -100,
+    paddingHorizontal: 24,
+    marginBottom: 40,
+    zIndex: 2,
   },
   appTitle: {
     fontFamily: FONT_FAMILY,
-    fontSize: 36,
+    fontSize: 42,
     fontWeight: '800',
-    color: '#FFF',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 6,
+    color: '#FFFFFF',
+    letterSpacing: -1,
+    marginBottom: 12,
   },
   appSubtitle: {
     fontFamily: FONT_FAMILY,
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#FFF',
-    lineHeight: 24,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
+    fontSize: 18,
+    fontWeight: '400',
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: 28,
+    maxWidth: '90%',
   },
 
   contentWrapper: {
-    marginTop: -20, 
-    paddingHorizontal: 16,
-    gap: 16,
+    paddingHorizontal: 20,
+    gap: 24,
     alignItems: 'center', 
+    zIndex: 5,
   },
 
   card: {
     backgroundColor: COLORS.surface,
-    borderRadius: 24,
-    padding: 24,
+    borderRadius: 20,
+    padding: 32,
     width: '100%',
-    maxWidth: 600, 
+    maxWidth: 640, 
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.04,
+    shadowRadius: 32,
     elevation: 3,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.03)',
+    borderColor: COLORS.border,
   },
+  
   missionCard: {
-    backgroundColor: '#F3FAF6',
-    borderColor: '#D1E8D5',
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
   },
   cardTitle: {
     fontFamily: FONT_FAMILY,
     fontSize: 22,
     fontWeight: '700',
     color: COLORS.textDark,
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: -0.5,
+  },
+  missionCardTitle: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    letterSpacing: -0.5,
   },
   cardSubtitle: {
     fontFamily: FONT_FAMILY,
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.textMedium,
-    lineHeight: 22,
-    marginBottom: 20,
+    lineHeight: 24,
+    marginBottom: 28,
   },
 
   missionHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   successPulse: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: COLORS.success,
-    marginRight: 10,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#4ADE80',
+    marginRight: 12,
   },
   missionMsg: {
     fontFamily: FONT_FAMILY,
-    fontSize: 15,
-    color: COLORS.textDark,
-    lineHeight: 22,
-    marginBottom: 20,
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: 24,
+    marginBottom: 32,
   },
+  boldText: {
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  
   statsRow: {
     flexDirection: 'row',
     gap: 16,
   },
   statBox: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E8F5E9',
   },
   statVal: {
     fontFamily: FONT_FAMILY,
     fontSize: 24,
     fontWeight: '800',
-    color: COLORS.success,
-    marginBottom: 4,
+    color: '#FFFFFF',
+    marginBottom: 8,
   },
   statLabel: {
     fontFamily: FONT_FAMILY,
-    fontSize: 13,
-    color: COLORS.textMedium,
-    textAlign: 'center',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.6)',
+    letterSpacing: 2,
     fontWeight: '600',
   },
 
   directoryBtn: {
-    backgroundColor: '#FFF0E6',
-    paddingVertical: 16,
-    borderRadius: 16,
+    backgroundColor: COLORS.background,
+    paddingVertical: 18,
+    borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#FFD1B3'
+    borderColor: '#EAEAEA'
   },
   directoryBtnText: {
     fontFamily: FONT_FAMILY,
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.primary
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.textDark,
   },
   directoryContainer: {
     marginTop: 8,
   },
   locationPrompt: {
-    backgroundColor: '#FAFAFA',
-    padding: 16,
-    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    padding: 24,
+    borderRadius: 16,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
   },
   locationText: {
     fontFamily: FONT_FAMILY,
+    fontSize: 15,
     color: COLORS.textMedium,
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 20,
+    lineHeight: 22,
   },
   locBtn: {
     backgroundColor: COLORS.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 30,
   },
   locBtnText: {
     fontFamily: FONT_FAMILY,
-    color: '#FFF',
-    fontWeight: '700',
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 14,
   },
   loadingBox: {
-    padding: 24,
+    padding: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: 16,
     fontFamily: FONT_FAMILY,
+    fontSize: 14,
     color: COLORS.textMedium,
   },
   errorText: {
     fontFamily: FONT_FAMILY,
-    color: '#D32F2F',
-    backgroundColor: '#FFF0F0',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: 12,
-    fontWeight: '600'
+    color: COLORS.accent,
+    backgroundColor: 'rgba(192,90,68,0.1)',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 16,
+    fontWeight: '500'
   },
   emptyText: {
     fontFamily: FONT_FAMILY,
     color: COLORS.textMedium,
     textAlign: 'center',
-    marginTop: 24,
-    marginBottom: 12,
-    fontStyle: 'italic'
+    marginTop: 32,
+    marginBottom: 16,
+    fontSize: 15,
   },
-  footerText: {
-    fontFamily: FONT_FAMILY,
-    fontSize: 14,
-    textAlign: 'center',
-    color: COLORS.textLight,
-    marginTop: 40,
-    fontStyle: 'italic',
-  }
 });
 
 export default HomeScreen;

@@ -1,18 +1,39 @@
+// =============================================================================
+// components/RespondersList.js — Premium Redesign
+// =============================================================================
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
 
 const FONT_FAMILY = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  ios: 'Avenir Next',
+  android: 'sans-serif-light',
+  web: '-apple-system, BlinkMacSystemFont, "Avenir Next", "Helvetica Neue", Helvetica, sans-serif',
 });
 
 const COLORS = {
-  primary: '#FF7F50',        
-  success: '#4CA57C',        
+  primary: '#2C4C3B',        
+  accent: '#C05A44',         
   surface: '#FFFFFF',
-  textDark: '#333333',
-  textMedium: '#666666',
+  textDark: '#1C1C1E',
+  textMedium: '#8A8A8E',
+  border: 'rgba(0,0,0,0.06)'
+};
+
+// Generates an elegant monogram from a full name
+const getMonogram = (name) => {
+  if (!name) return '';
+  const parts = name.trim().split(' ');
+  if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.substring(0, 2).toUpperCase();
+};
+
+const formatType = (type) => {
+  switch (type) {
+    case 'ngo': return 'ORGANIZATION';
+    case 'vet': return 'VETERINARY';
+    default: return 'VOLUNTEER';
+  }
 };
 
 const RespondersList = ({ responders }) => {
@@ -30,31 +51,26 @@ const RespondersList = ({ responders }) => {
   return (
     <View style={s.listContainer}>
       {responders.map((r, i) => (
-        <View key={r.responder_id || i} style={s.responderCard}>
-          <View style={s.responderHeader}>
-            <View style={[s.avatar, { backgroundColor: r.responder_type === 'ngo' ? '#E8F5E9' : '#FFF3E0' }]}>
-              <Text style={s.avatarEmoji}>
-                {r.responder_type === 'ngo' ? '🐾' : r.responder_type === 'vet' ? '🩺' : '❤️'}
-              </Text>
+        <View key={r.responder_id || i} style={s.card}>
+          <View style={s.cardHeader}>
+            <View style={s.avatar}>
+              <Text style={s.monogram}>{getMonogram(r.full_name)}</Text>
             </View>
             <View style={s.info}>
               <Text style={s.name}>{r.full_name}</Text>
-              <Text style={s.type}>
-                {r.responder_type === 'ngo' ? 'Animal Rescue Org' : r.responder_type === 'vet' ? 'Veterinary Clinic' : 'Local Volunteer'}
-              </Text>
-              <Text style={s.distance}>{Math.round(r.distance_metres)}m away</Text>
+              <Text style={s.type}>{formatType(r.responder_type)}  ·  {Math.round(r.distance_metres)}M</Text>
             </View>
           </View>
           
-          <View style={s.actionsRow}>
+          <View style={s.actions}>
             {r.phone && (
-              <TouchableOpacity style={[s.actionBtn, s.callBtn]} onPress={() => handleCall(r.phone)}>
-                <Text style={s.btnTextWhite}>📞 Call</Text>
+              <TouchableOpacity style={[s.btn, s.btnPrimary]} onPress={() => handleCall(r.phone)}>
+                <Text style={s.btnTextWhite}>Contact</Text>
               </TouchableOpacity>
             )}
             {r.latitude && r.longitude && (
-              <TouchableOpacity style={[s.actionBtn, s.mapBtn]} onPress={() => handleMap(r.latitude, r.longitude)}>
-                <Text style={s.btnTextPrimary}>🗺️ Map</Text>
+              <TouchableOpacity style={[s.btn, s.btnOutline]} onPress={() => handleMap(r.latitude, r.longitude)}>
+                <Text style={s.btnTextDark}>Navigate</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -65,28 +81,39 @@ const RespondersList = ({ responders }) => {
 };
 
 const s = StyleSheet.create({
-  listContainer: { gap: 16, marginTop: 16 },
-  responderCard: {
+  listContainer: { gap: 20, marginTop: 24 },
+  card: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
-    padding: 16,
+    padding: 24,
     borderWidth: 1,
-    borderColor: '#F0E6D2',
-    marginBottom: 0
+    borderColor: '#EAEAEA',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    elevation: 1,
   },
-  responderHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  avatar: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginRight: 12 },
-  avatarEmoji: { fontSize: 24 },
+  cardHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  avatar: { 
+    width: 48, height: 48, 
+    borderRadius: 12, 
+    backgroundColor: '#F9F9F7', 
+    alignItems: 'center', justifyContent: 'center', 
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)'
+  },
+  monogram: { fontFamily: FONT_FAMILY, fontSize: 16, fontWeight: '700', color: COLORS.textDark, letterSpacing: 1 },
   info: { flex: 1 },
-  name: { fontFamily: FONT_FAMILY, fontSize: 16, fontWeight: '700', color: COLORS.textDark, marginBottom: 4 },
-  type: { fontFamily: FONT_FAMILY, fontSize: 13, color: COLORS.textMedium, marginBottom: 4 },
-  distance: { fontFamily: FONT_FAMILY, fontSize: 13, color: COLORS.primary, fontWeight: '800' },
-  actionsRow: { flexDirection: 'row', gap: 10 },
-  actionBtn: { flex: 1, paddingVertical: 10, borderRadius: 8, alignItems: 'center', justifyContent: 'center', flexDirection: 'row' },
-  callBtn: { backgroundColor: COLORS.success },
-  mapBtn: { backgroundColor: '#FFF0E6', borderWidth: 1, borderColor: '#FFD1B3' },
-  btnTextWhite: { fontFamily: FONT_FAMILY, color: '#FFF', fontWeight: '700', fontSize: 14 },
-  btnTextPrimary: { fontFamily: FONT_FAMILY, color: COLORS.primary, fontWeight: '700', fontSize: 14 }
+  name: { fontFamily: FONT_FAMILY, fontSize: 18, fontWeight: '600', color: COLORS.textDark, marginBottom: 4, letterSpacing: -0.3 },
+  type: { fontFamily: FONT_FAMILY, fontSize: 11, fontWeight: '700', color: COLORS.textMedium, letterSpacing: 1 },
+  actions: { flexDirection: 'row', gap: 12 },
+  btn: { flex: 1, paddingVertical: 14, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+  btnPrimary: { backgroundColor: COLORS.textDark },
+  btnOutline: { backgroundColor: 'transparent', borderWidth: 1, borderColor: '#D1D1D6' },
+  btnTextWhite: { fontFamily: FONT_FAMILY, color: '#FFFFFF', fontWeight: '600', fontSize: 14, letterSpacing: 0.5 },
+  btnTextDark: { fontFamily: FONT_FAMILY, color: COLORS.textDark, fontWeight: '600', fontSize: 14, letterSpacing: 0.5 }
 });
 
 export default RespondersList;

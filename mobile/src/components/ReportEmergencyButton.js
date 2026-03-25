@@ -1,5 +1,5 @@
 // =============================================================================
-// components/ReportEmergencyButton.js — Compassionate Redesign
+// components/ReportEmergencyButton.js — Premium Redesign
 // =============================================================================
 
 import React from 'react';
@@ -13,25 +13,22 @@ import {
 } from 'react-native';
 
 const COLORS = {
-  primary: '#FF7F50',        // Warm Coral
-  primaryActive: '#E76B3E',  // Darker Coral for pressed state
-  success: '#4CA57C',        // Compassionate Green
-  successBg: '#E8F5E9',      // Light Green Background
+  primary: '#2C4C3B',        // Deep Forest Green
+  accent: '#C05A44',         // Terracotta for Emergency
   surface: '#FFFFFF',
-  textDark: '#333333',
-  textMedium: '#666666',
-  textLight: '#999999',
-  border: '#F0E6D2',
-  disabledBg: '#F5F5F5',
-  disabledText: '#CCCCCC',
-  errorBg: '#FFF0F0',
-  errorText: '#D32F2F',
+  textDark: '#1C1C1E',
+  textMedium: '#8A8A8E',
+  disabledBg: '#F2F2F7',
+  disabledText: '#C7C7CC',
+  errorBg: 'rgba(192,90,68,0.1)',
+  errorText: '#C05A44',
+  successText: '#2C4C3B',
 };
 
 const FONT_FAMILY = Platform.select({
-  ios: 'System',
-  android: 'sans-serif',
-  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+  ios: 'Avenir Next',
+  android: 'sans-serif-light',
+  web: '-apple-system, BlinkMacSystemFont, "Avenir Next", "Helvetica Neue", Helvetica, sans-serif',
 });
 
 const ReportEmergencyButton = ({
@@ -48,48 +45,44 @@ const ReportEmergencyButton = ({
   return (
     <View style={s.container}>
       <View style={s.header}>
-        <Text style={s.title}>Report an Emergency</Text>
+        <Text style={s.title}>Emergency Dispatch</Text>
         <Text style={s.subtitle}>
-          Help us find the distressed animal by sharing your current location.
+          Secure a GPS lock to instantly alert registered responders in your vicinity.
         </Text>
       </View>
 
       {/* ── Step 1: Location ─────────────────────────────────────────── */}
       <View style={s.stepContainer}>
         <View style={s.stepHeader}>
-          <Text style={[s.stepNumber, hasLocation && s.stepNumberSuccess]}>1</Text>
-          <Text style={s.stepTitle}>Locate</Text>
+          <Text style={s.stepNumber}>01</Text>
+          <Text style={s.stepTitle}>Acquire Location</Text>
         </View>
         
         <TouchableOpacity
           style={[s.button, hasLocation ? s.buttonSecondary : s.buttonOutline]}
           onPress={onFetchLocation}
           disabled={isFetchingLocation || isSubmitting || isSuccess}
-          activeOpacity={0.7}
+          activeOpacity={0.6}
         >
           {isFetchingLocation ? (
-            <ActivityIndicator color={COLORS.primary} size="small" />
+            <ActivityIndicator color={COLORS.textDark} size="small" />
           ) : (
-            <>
-              <Text style={s.emojiIcon}>{hasLocation ? '📍' : '📡'}</Text>
-              <Text style={[s.buttonText, hasLocation ? s.buttonTextSecondary : s.buttonTextOutline]}>
-                {hasLocation ? 'Location Found' : 'Find My Location'}
-              </Text>
-            </>
+            <Text style={[s.buttonText, hasLocation ? s.buttonTextSecondary : s.buttonTextOutline]}>
+              {hasLocation ? 'Position Secured' : 'Lock GPS Coordinates'}
+            </Text>
           )}
         </TouchableOpacity>
 
-        {/* Address Display */}
         {address && (
           <View style={s.addressBlock}>
+            <Text style={s.addressLabel}>DETECTED LOCATION</Text>
             <Text style={s.addressText}>{address}</Text>
           </View>
         )}
 
-        {/* Location Error */}
         {locationError && (
           <View style={s.errorBlock}>
-            <Text style={s.errorText}>⚠ {locationError}</Text>
+            <Text style={s.errorText}>{locationError}</Text>
           </View>
         )}
       </View>
@@ -97,8 +90,8 @@ const ReportEmergencyButton = ({
       {/* ── Step 2: Report ───────────────────────────────────────────── */}
       <View style={[s.stepContainer, s.stepTwoContainer]}>
         <View style={s.stepHeader}>
-          <Text style={[s.stepNumber, isSuccess && s.stepNumberSuccess]}>2</Text>
-          <Text style={s.stepTitle}>Get Help</Text>
+          <Text style={s.stepNumber}>02</Text>
+          <Text style={s.stepTitle}>Initialize Rescue</Text>
         </View>
 
         <TouchableOpacity
@@ -112,19 +105,15 @@ const ReportEmergencyButton = ({
           activeOpacity={0.8}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#FFF" size="small" />
+            <ActivityIndicator color="#FFFFFF" size="small" />
           ) : (
-            <>
-              <Text style={s.emojiIcon}>🐾</Text>
-              <Text style={s.buttonTextPrimary}>Send Rescue Alert</Text>
-            </>
+            <Text style={s.buttonTextPrimary}>Transmit Alert</Text>
           )}
         </TouchableOpacity>
 
-        {/* Submit Error */}
         {submitError && (
           <View style={s.errorBlock}>
-            <Text style={s.errorText}>⚠ {submitError}</Text>
+            <Text style={s.errorText}>{submitError}</Text>
           </View>
         )}
       </View>
@@ -142,149 +131,130 @@ const s = StyleSheet.create({
   },
   
   header: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   title: {
     fontFamily: FONT_FAMILY,
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: '700',
     color: COLORS.textDark,
-    marginBottom: 6,
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontFamily: FONT_FAMILY,
-    fontSize: 15,
+    fontSize: 16,
     color: COLORS.textMedium,
-    lineHeight: 22,
+    lineHeight: 24,
   },
 
-  // ── Steps ─────────────────────────────────────────────────────────────
   stepContainer: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   stepTwoContainer: {
-    marginBottom: 0, // Last element doesn't need margin
+    marginBottom: 0, 
   },
   stepHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   stepNumber: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#F0E6D2',
-    color: COLORS.textMedium,
-    textAlign: 'center',
-    lineHeight: 24,
     fontFamily: FONT_FAMILY,
-    fontWeight: '800',
-    fontSize: 13,
-    marginRight: 10,
-    overflow: 'hidden', // Ensure text stays in circle on web
-  },
-  stepNumberSuccess: {
-    backgroundColor: COLORS.success,
-    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 12,
+    color: COLORS.textMedium,
+    marginRight: 12,
+    letterSpacing: 1,
   },
   stepTitle: {
     fontFamily: FONT_FAMILY,
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: COLORS.textDark,
+    letterSpacing: -0.2,
   },
 
-  // ── Buttons ─────────────────────────────────────────────────────────────
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16, // Softer, friendlier corners
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    gap: 10,
+    borderRadius: 30, // Premium pill shape
+    paddingVertical: 18,
+    paddingHorizontal: 24,
   },
-  
   buttonPrimary: {
-    backgroundColor: COLORS.primary,
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: COLORS.accent,
   },
   buttonSecondary: {
-    backgroundColor: COLORS.successBg,
-    borderColor: '#C8E6C9',
+    backgroundColor: '#F9F9F7',
     borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.08)',
   },
   buttonOutline: {
-    backgroundColor: '#FFF',
-    borderColor: '#E0E0E0',
-    borderWidth: 2,
-    borderStyle: 'dashed',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EAEAEA',
   },
   buttonDisabled: {
     backgroundColor: COLORS.disabledBg,
-    shadowOpacity: 0,
-    elevation: 0,
     borderColor: 'transparent',
   },
 
   buttonTextPrimary: {
     fontFamily: FONT_FAMILY,
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
     color: '#FFFFFF',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
   buttonTextSecondary: {
     fontFamily: FONT_FAMILY,
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.success,
+    fontWeight: '500',
+    color: COLORS.successText,
+    letterSpacing: 0.5,
   },
   buttonTextOutline: {
     fontFamily: FONT_FAMILY,
     fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.textMedium,
-  },
-  
-  emojiIcon: {
-    fontSize: 18,
+    fontWeight: '500',
+    color: COLORS.textDark,
+    letterSpacing: 0.5,
   },
 
-  // ── Feedback Blocks ─────────────────────────────────────────────────────
   addressBlock: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: '#FAFAFA',
-    borderRadius: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: COLORS.success,
+    marginTop: 16,
+    padding: 20,
+    backgroundColor: '#F9F9F7',
+    borderRadius: 16,
+  },
+  addressLabel: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.textMedium,
+    letterSpacing: 1,
+    marginBottom: 8,
   },
   addressText: {
     fontFamily: FONT_FAMILY,
     fontSize: 14,
-    color: COLORS.textMedium,
-    lineHeight: 20,
+    color: COLORS.textDark,
+    lineHeight: 22,
   },
   
   errorBlock: {
-    marginTop: 12,
-    padding: 12,
+    marginTop: 16,
+    padding: 16,
     backgroundColor: COLORS.errorBg,
     borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   errorText: {
     fontFamily: FONT_FAMILY,
     fontSize: 14,
     color: COLORS.errorText,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });
 
