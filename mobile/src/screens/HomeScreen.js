@@ -1,47 +1,37 @@
 // =============================================================================
-// screens/HomeScreen.js — Tactical Ops Dashboard
-// =============================================================================
-// Redesigned to match a military/tactical ops command center aesthetic.
-// Dark black background, orange accents, monospace fonts, card grid layout.
-//
-// SEPARATION PRINCIPLE PRESERVED:
-//   All data comes from hooks. This is purely visual wiring.
+// screens/HomeScreen.js — Compassionate Redesign
 // =============================================================================
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
   Platform,
-  TouchableOpacity,
+  Image,
 } from 'react-native';
 import { useLocation } from '../hooks/useLocation';
 import { useReportSubmission } from '../hooks/useReportSubmission';
 import ReportEmergencyButton from '../components/ReportEmergencyButton';
 
-// ── Monospace font helper ───────────────────────────────────────────────────
-const MONO = Platform.select({
-  web: 'Courier New, Courier, monospace',
-  ios: 'Courier New',
-  android: 'monospace',
-  default: 'monospace',
-});
-
-// ── Live clock component ────────────────────────────────────────────────────
-const LiveClock = () => {
-  const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
-  }, []);
-  return (
-    <Text style={s.clockText}>
-      LAST UPDATE: {time.toISOString().replace('T', ' ').substring(0, 19)} UTC
-    </Text>
-  );
+// ── Colors ──────────────────────────────────────────────────────────────────
+const COLORS = {
+  background: '#FFF9F0',     // Warm neutral
+  surface: '#FFFFFF',        // Pure white cards
+  primary: '#FF7F50',        // Coral / Orange
+  success: '#4CA57C',        // Calming green
+  textDark: '#333333',       // Main text
+  textMedium: '#666666',     // Subtitles
+  textLight: '#999999',      // Meta text
+  border: '#F0E6D2',         // Soft borders
 };
+
+const FONT_FAMILY = Platform.select({
+  ios: 'System',
+  android: 'sans-serif',
+  web: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+});
 
 const HomeScreen = () => {
   const {
@@ -72,645 +62,299 @@ const HomeScreen = () => {
     });
   };
 
-  // ── Activity log entries ──────────────────────────────────────────────────
-  const [uptime, setUptime] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setUptime((u) => u + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const formatUptime = (secs) => {
-    const h = String(Math.floor(secs / 3600)).padStart(2, '0');
-    const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
-    const sec = String(secs % 60).padStart(2, '0');
-    return `${h}:${m}:${sec}`;
-  };
-
   return (
-    <View style={s.root}>
-      {/* ── Sidebar ──────────────────────────────────────────────────── */}
-      <View style={s.sidebar}>
-        <View style={s.sidebarHeader}>
-          <Text style={s.sidebarTitle}>RESCUE OPS</Text>
-          <Text style={s.sidebarVersion}>v2.1.7 CLASSIFIED</Text>
-        </View>
-
-        <TouchableOpacity style={[s.navItem, s.navItemActive]}>
-          <Text style={s.navIcon}>⬡</Text>
-          <Text style={[s.navText, s.navTextActive]}>COMMAND CENTER</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.navItem}>
-          <Text style={s.navIcon}>◈</Text>
-          <Text style={s.navText}>RESPONDER NET</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.navItem}>
-          <Text style={s.navIcon}>◉</Text>
-          <Text style={s.navText}>OPERATIONS</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.navItem}>
-          <Text style={s.navIcon}>◇</Text>
-          <Text style={s.navText}>INTELLIGENCE</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={s.navItem}>
-          <Text style={s.navIcon}>⚙</Text>
-          <Text style={s.navText}>SYSTEMS</Text>
-        </TouchableOpacity>
-
-        <View style={s.sidebarFooter}>
-          <View style={s.statusDot} />
-          <Text style={s.statusOnline}>SYSTEM ONLINE</Text>
-          <Text style={s.statusMeta}>UPTIME: {formatUptime(uptime)}</Text>
-          <Text style={s.statusMeta}>
-            RESPONDERS: {nearbyResponders.length > 0 ? nearbyResponders.length : '—'} ACTIVE
-          </Text>
-          <Text style={s.statusMeta}>
-            MISSIONS: {currentReport ? '1 ONGOING' : '0 ONGOING'}
-          </Text>
+    <ScrollView style={s.root} contentContainerStyle={s.mainContent}>
+      
+      {/* ── Hero Image ────────────────────────────────────────────────────────── */}
+      <View style={s.heroContainer}>
+        <Image 
+          source={{ uri: 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?q=80&w=1000&auto=format&fit=crop' }} 
+          style={s.heroImage} 
+        />
+        <View style={s.heroOverlay}>
+          <Text style={s.appTitle}>Rescue Paws ♡</Text>
+          <Text style={s.appSubtitle}>Compassion in action. Help animals in need with a single tap.</Text>
         </View>
       </View>
 
-      {/* ── Main Content ─────────────────────────────────────────────── */}
-      <ScrollView style={s.main} contentContainerStyle={s.mainContent}>
-        {/* ── Top bar ────────────────────────────────────────────────── */}
-        <View style={s.topBar}>
-          <View style={s.breadcrumb}>
-            <Text style={s.breadcrumbText}>TACTICAL COMMAND / </Text>
-            <Text style={s.breadcrumbActive}>OVERVIEW</Text>
-          </View>
-          <LiveClock />
+      <View style={s.contentWrapper}>
+        {/* ── Main Report Action ──────────────────────────────────────────────── */}
+        <View style={s.card}>
+          <ReportEmergencyButton
+            onFetchLocation={fetchLocation}
+            onSubmitReport={handleSubmitReport}
+            isFetchingLocation={isFetchingLocation}
+            isSubmitting={isSubmitting}
+            hasLocation={!!location}
+            address={address}
+            locationError={locationError}
+            submitError={submitError}
+            isSuccess={!!currentReport}
+          />
         </View>
 
-        {/* ── Dashboard Grid ─────────────────────────────────────────── */}
-        <View style={s.grid}>
-          {/* ── Report Card (replaces Agent Allocation) ──────────────── */}
-          <View style={[s.card, s.cardReport]}>
-            <ReportEmergencyButton
-              onFetchLocation={fetchLocation}
-              onSubmitReport={handleSubmitReport}
-              isFetchingLocation={isFetchingLocation}
-              isSubmitting={isSubmitting}
-              hasLocation={!!location}
-              address={address}
-              locationError={locationError}
-              submitError={submitError}
-              isSuccess={!!currentReport}
-            />
-          </View>
-
-          {/* ── Activity Log ─────────────────────────────────────────── */}
-          <View style={[s.card, s.cardLog]}>
-            <Text style={s.cardTitle}>ACTIVITY LOG</Text>
-            <View style={s.logDivider} />
-
-            {currentReport ? (
-              <>
-                <View style={s.logEntry}>
-                  <Text style={s.logTime}>
-                    {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
-                  </Text>
-                  <Text style={s.logMsg}>
-                    Report <Text style={s.logHighlight}>#{currentReport.id?.substring(0, 8)}</Text>{' '}
-                    submitted at coordinates{'\n'}
-                    ({currentReport.latitude?.toFixed(4)}, {currentReport.longitude?.toFixed(4)})
-                  </Text>
-                </View>
-                <View style={s.logEntry}>
-                  <Text style={s.logTime}>
-                    {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
-                  </Text>
-                  <Text style={s.logMsg}>
-                    <Text style={s.logHighlight}>{nearbyResponders.length}</Text> responders
-                    detected within 5km radius
-                  </Text>
-                </View>
-                <View style={s.logEntry}>
-                  <Text style={s.logTime}>
-                    {new Date().toLocaleDateString()} {new Date().toLocaleTimeString()}
-                  </Text>
-                  <Text style={s.logMsg}>
-                    Dispatch alert sent to{' '}
-                    <Text style={s.logHighlight}>
-                      {nearbyResponders[0]?.full_name || 'responders'}
-                    </Text>
-                  </Text>
-                </View>
-              </>
-            ) : (
-              <>
-                <View style={s.logEntry}>
-                  <Text style={s.logTime}>— — —</Text>
-                  <Text style={s.logMsg}>Awaiting new incident report…</Text>
-                </View>
-                <View style={s.logEntry}>
-                  <Text style={s.logTime}>— — —</Text>
-                  <Text style={s.logMsg}>
-                    System monitoring <Text style={s.logHighlight}>active</Text>
-                  </Text>
-                </View>
-              </>
-            )}
-          </View>
-
-          {/* ── Encrypted Comms / System Panel ───────────────────────── */}
-          <View style={[s.card, s.cardComms]}>
-            <Text style={s.cardTitle}>ENCRYPTED COMMS</Text>
-            <View style={s.logDivider} />
-
-            {/* Radar visual (ASCII art style) */}
-            <View style={s.radarContainer}>
-              <Text style={s.radarText}>
-                {'    ╭─────────╮\n'}
-                {'  ╭─┤  ◉    ╱ ├─╮\n'}
-                {'  │ │    ╱    │ │\n'}
-                {'  │ │  ╱  ·   │ │\n'}
-                {'  │ │╱    ·   │ │\n'}
-                {'  ╰─┤         ├─╯\n'}
-                {'    ╰─────────╯'}
-              </Text>
+        {/* ── Status & Mission Update (Only shows after reporting) ──────────── */}
+        {currentReport && (
+          <View style={[s.card, s.missionCard]}>
+            <View style={s.missionHeaderRow}>
+              <View style={s.successPulse} />
+              <Text style={s.cardTitle}>Help is on the way</Text>
             </View>
+            <Text style={s.missionMsg}>
+              Your report <Text style={{fontWeight: '700'}}>#{currentReport.id?.substring(0, 6)}</Text> has been received. 
+              We've alerted local responders near your location!
+            </Text>
 
-            <View style={s.terminalBlock}>
-              <Text style={s.terminalText}>
-                {'# ' + new Date().toISOString().substring(0, 19) + ' UTC\n'}
-                {'> [SYS:rescue_net] ::: INIT >>\n'}
-                {'^^^ loading secure channel\n'}
-                {'> CH#1 | GPS.COORD.' + (location ? `${location.latitude.toFixed(3)}` : '—') + '\n'}
-                {'> KEY LOCKED\n'}
-                {'> STATUS >> "...monitoring all\n'}
-                {'  frequencies... awaiting\n'}
-                {'  rescue dispatch"'}
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ── Responders Grid (lower section) ────────────────────────── */}
-        {nearbyResponders.length > 0 && (
-          <View style={s.lowerGrid}>
-            {/* ── Responder Allocation ─────────────────────────────────── */}
-            <View style={[s.card, s.cardAllocation]}>
-              <Text style={s.cardTitle}>RESPONDER ALLOCATION</Text>
-              <View style={s.logDivider} />
-
-              {nearbyResponders.map((r, i) => (
-                <View key={r.responder_id || i} style={s.agentRow}>
-                  <View
-                    style={[
-                      s.agentDot,
-                      {
-                        backgroundColor:
-                          r.responder_type === 'ngo'
-                            ? '#4ADE80'
-                            : r.responder_type === 'vet'
-                            ? '#E8731E'
-                            : '#6B7280',
-                      },
-                    ]}
-                  />
-                  <View style={s.agentInfo}>
-                    <Text style={s.agentCode}>
-                      R-{String(i + 1).padStart(3, '0')}
-                      {r.responder_type === 'vet' ? 'V' : r.responder_type === 'ngo' ? 'N' : 'X'}
-                    </Text>
-                    <Text style={s.agentName}>{r.full_name.toUpperCase()}</Text>
-                  </View>
-                  <Text style={s.agentDist}>{Math.round(r.distance_metres)}m</Text>
-                </View>
-              ))}
-            </View>
-
-            {/* ── Mission Information ──────────────────────────────────── */}
-            <View style={[s.card, s.cardMission]}>
-              <Text style={s.cardTitle}>MISSION INFORMATION</Text>
-              <View style={s.logDivider} />
-
-              <View style={s.missionRow}>
-                <View style={[s.missionDot, { backgroundColor: '#E8731E' }]} />
-                <Text style={s.missionLabel}>Active Rescue</Text>
+            <View style={s.statsRow}>
+              <View style={s.statBox}>
+                <Text style={s.statVal}>{nearbyResponders.length}</Text>
+                <Text style={s.statLabel}>Responders{'\n'}Notified</Text>
               </View>
-
-              <View style={s.missionStats}>
-                <View style={s.missionStatRow}>
-                  <Text style={s.missionStatLabel}>NGO Responders</Text>
-                  <Text style={s.missionStatVal}>
-                    {nearbyResponders.filter((r) => r.responder_type === 'ngo').length}
-                  </Text>
-                </View>
-                <View style={s.missionStatRow}>
-                  <Text style={s.missionStatLabel}>Vet Responders</Text>
-                  <Text style={s.missionStatVal}>
-                    {nearbyResponders.filter((r) => r.responder_type === 'vet').length}
-                  </Text>
-                </View>
-                <View style={s.missionStatRow}>
-                  <Text style={s.missionStatLabel}>Volunteers</Text>
-                  <Text style={s.missionStatVal}>
-                    {nearbyResponders.filter((r) => r.responder_type === 'volunteer').length}
-                  </Text>
-                </View>
-                <View style={[s.missionStatRow, s.missionStatRowTotal]}>
-                  <Text style={[s.missionStatLabel, { color: '#E8731E' }]}>Total Dispatched</Text>
-                  <Text style={[s.missionStatVal, { color: '#E8731E' }]}>
-                    {nearbyResponders.length}
-                  </Text>
-                </View>
+              <View style={s.statBox}>
+                <Text style={s.statVal}>Active</Text>
+                <Text style={s.statLabel}>Mission{'\n'}Status</Text>
               </View>
             </View>
           </View>
         )}
-      </ScrollView>
-    </View>
+
+        {/* ── Nearby Responders List (Only shows if there are any) ────────────── */}
+        {nearbyResponders.length > 0 && (
+          <View style={s.card}>
+            <Text style={s.cardTitle}>Local Heroes Nearby</Text>
+            <Text style={s.cardSubtitle}>
+              These compassionate organizations have been alerted and are reviewing your distress call.
+            </Text>
+
+            <View style={s.respondersList}>
+              {nearbyResponders.map((r, i) => (
+                <View key={r.responder_id || i} style={s.responderRow}>
+                  <View style={[s.avatar, { backgroundColor: r.responder_type === 'ngo' ? '#E8F5E9' : '#FFF3E0' }]}>
+                    <Text style={s.avatarEmoji}>
+                      {r.responder_type === 'ngo' ? '🐾' : r.responder_type === 'vet' ? '🩺' : '❤️'}
+                    </Text>
+                  </View>
+                  <View style={s.responderInfo}>
+                    <Text style={s.responderName}>{r.full_name}</Text>
+                    <Text style={s.responderType}>
+                      {r.responder_type === 'ngo' ? 'Animal Rescue Org' : r.responder_type === 'vet' ? 'Veterinary Clinic' : 'Local Volunteer'}
+                    </Text>
+                  </View>
+                  <View style={s.distanceBadge}>
+                    <Text style={s.distanceText}>{Math.round(r.distance_metres)}m</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+      </View>
+      
+      {/* ── Footer ───────────────────────────────────────────────────────────── */}
+      <Text style={s.footerText}>Thank you for being a voice for the voiceless. 🕊️</Text>
+    </ScrollView>
   );
 };
 
-// =============================================================================
-// STYLES — Tactical Ops Command Center
-// =============================================================================
-
-const ACCENT = '#E8731E';       // Orange
-const BG = '#0A0A0A';           // Pure black
-const CARD_BG = '#111111';      // Slightly lighter for cards
-const BORDER = '#1E1E1E';       // Subtle card borders
-const TEXT_DIM = '#5A5A5A';     // Dimmed text
-const TEXT_MED = '#888888';     // Medium text
-const TEXT_BRIGHT = '#D4D4D4';  // Bright text
-
-const webShadow = Platform.OS === 'web'
-  ? { boxShadow: '0 0 1px rgba(232,115,30,0.1)' }
-  : {};
-
+// ── Styles ──────────────────────────────────────────────────────────────────
 const s = StyleSheet.create({
   root: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: BG,
+    backgroundColor: COLORS.background,
   },
-
-  // ── Sidebar ───────────────────────────────────────────────────────────
-  sidebar: {
-    width: 200,
-    backgroundColor: '#0D0D0D',
-    borderRightWidth: 1,
-    borderRightColor: BORDER,
-    paddingTop: 24,
-    justifyContent: 'flex-start',
+  mainContent: {
+    paddingBottom: 60,
   },
-
-  sidebarHeader: {
-    paddingHorizontal: 16,
-    marginBottom: 24,
+  
+  // ── Hero Section ────────────────────────
+  heroContainer: {
+    width: '100%',
+    height: 320,
+    position: 'relative',
+    backgroundColor: COLORS.primary,
   },
-
-  sidebarTitle: {
-    fontFamily: MONO,
-    fontSize: 18,
-    fontWeight: '900',
-    color: TEXT_BRIGHT,
-    letterSpacing: 2,
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.85,
   },
-
-  sidebarVersion: {
-    fontFamily: MONO,
-    fontSize: 10,
-    color: TEXT_DIM,
-    marginTop: 2,
-    letterSpacing: 1,
-  },
-
-  navItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderLeftWidth: 3,
-    borderLeftColor: 'transparent',
-  },
-
-  navItemActive: {
-    backgroundColor: 'rgba(232,115,30,0.08)',
-    borderLeftColor: ACCENT,
-  },
-
-  navIcon: {
-    fontFamily: MONO,
-    fontSize: 14,
-    color: TEXT_DIM,
-    marginRight: 10,
-    width: 20,
-    textAlign: 'center',
-  },
-
-  navText: {
-    fontFamily: MONO,
-    fontSize: 12,
-    color: TEXT_DIM,
-    letterSpacing: 1,
-    fontWeight: '600',
-  },
-
-  navTextActive: {
-    color: ACCENT,
-  },
-
-  sidebarFooter: {
+  heroOverlay: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    padding: 16,
-    borderTopWidth: 1,
-    borderTopColor: BORDER,
+    padding: 24,
+    paddingBottom: 40, // More space to blend into content
+    backgroundColor: 'rgba(0,0,0,0.4)', // Soft gradient-like darkening
   },
-
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#4ADE80',
-    marginBottom: 6,
-  },
-
-  statusOnline: {
-    fontFamily: MONO,
-    fontSize: 12,
+  appTitle: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 36,
     fontWeight: '800',
-    color: TEXT_BRIGHT,
-    letterSpacing: 1,
-    marginBottom: 6,
+    color: '#FFF',
+    marginBottom: 8,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 6,
+  },
+  appSubtitle: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#FFF',
+    lineHeight: 24,
+    textShadowColor: 'rgba(0,0,0,0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+    maxWidth: '90%',
   },
 
-  statusMeta: {
-    fontFamily: MONO,
-    fontSize: 10,
-    color: TEXT_DIM,
-    lineHeight: 16,
+  // ── Content Layout ──────────────────────
+  contentWrapper: {
+    marginTop: -20, // Pulls content up over the hero slightly
+    paddingHorizontal: 16,
+    gap: 16,
+    alignItems: 'center', // Centers web content gracefully
   },
 
-  // ── Main Content ──────────────────────────────────────────────────────
-  main: {
-    flex: 1,
-    backgroundColor: BG,
+  // ── Cards ───────────────────────────────
+  card: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 24,
+    padding: 24,
+    width: '100%',
+    maxWidth: 600, // Limit width on large screens (Web layout support)
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.03)',
   },
-
-  mainContent: {
-    padding: 20,
-    paddingBottom: 40,
+  missionCard: {
+    backgroundColor: '#F3FAF6',
+    borderColor: '#D1E8D5',
   },
-
-  // ── Top Bar ───────────────────────────────────────────────────────────
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  cardTitle: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.textDark,
+    marginBottom: 8,
+  },
+  cardSubtitle: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 15,
+    color: COLORS.textMedium,
+    lineHeight: 22,
     marginBottom: 20,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
   },
 
-  breadcrumb: {
+  // ── Mission Block ───────────────────────
+  missionHeaderRow: {
     flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-
-  breadcrumbText: {
-    fontFamily: MONO,
+  successPulse: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: COLORS.success,
+    marginRight: 10,
+  },
+  missionMsg: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 15,
+    color: COLORS.textDark,
+    lineHeight: 22,
+    marginBottom: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  statBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E8F5E9',
+  },
+  statVal: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 24,
+    fontWeight: '800',
+    color: COLORS.success,
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontFamily: FONT_FAMILY,
     fontSize: 13,
-    color: TEXT_DIM,
-    letterSpacing: 1,
+    color: COLORS.textMedium,
+    textAlign: 'center',
     fontWeight: '600',
   },
 
-  breadcrumbActive: {
-    fontFamily: MONO,
-    fontSize: 13,
-    color: ACCENT,
-    letterSpacing: 1,
+  // ── Responders List ─────────────────────
+  respondersList: {
+    gap: 16,
+  },
+  responderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  avatarEmoji: {
+    fontSize: 24,
+  },
+  responderInfo: {
+    flex: 1,
+  },
+  responderName: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 16,
     fontWeight: '700',
-  },
-
-  clockText: {
-    fontFamily: MONO,
-    fontSize: 11,
-    color: TEXT_DIM,
-    letterSpacing: 0.5,
-  },
-
-  // ── Grid layout ───────────────────────────────────────────────────────
-  grid: {
-    flexDirection: 'row',
-    gap: 16,
-    flexWrap: 'wrap',
-  },
-
-  lowerGrid: {
-    flexDirection: 'row',
-    gap: 16,
-    marginTop: 16,
-    flexWrap: 'wrap',
-  },
-
-  // ── Cards ─────────────────────────────────────────────────────────────
-  card: {
-    backgroundColor: CARD_BG,
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 4,
-    padding: 20,
-    ...webShadow,
-  },
-
-  cardReport: {
-    flex: 1,
-    minWidth: 280,
-  },
-
-  cardLog: {
-    flex: 1,
-    minWidth: 250,
-  },
-
-  cardComms: {
-    flex: 1,
-    minWidth: 250,
-  },
-
-  cardAllocation: {
-    flex: 2,
-    minWidth: 300,
-  },
-
-  cardMission: {
-    flex: 1,
-    minWidth: 250,
-  },
-
-  cardTitle: {
-    fontFamily: MONO,
-    fontSize: 14,
-    fontWeight: '800',
-    color: TEXT_BRIGHT,
-    letterSpacing: 2,
-    marginBottom: 12,
-  },
-
-  logDivider: {
-    height: 1,
-    backgroundColor: BORDER,
-    marginBottom: 16,
-  },
-
-  // ── Activity Log Entries ──────────────────────────────────────────────
-  logEntry: {
-    marginBottom: 16,
-    paddingLeft: 12,
-    borderLeftWidth: 2,
-    borderLeftColor: BORDER,
-  },
-
-  logTime: {
-    fontFamily: MONO,
-    fontSize: 11,
-    color: TEXT_DIM,
+    color: COLORS.textDark,
     marginBottom: 4,
   },
-
-  logMsg: {
-    fontFamily: MONO,
-    fontSize: 12,
-    color: TEXT_MED,
-    lineHeight: 18,
+  responderType: {
+    fontFamily: FONT_FAMILY,
+    fontSize: 13,
+    color: COLORS.textMedium,
+    fontWeight: '500',
+  },
+  distanceBadge: {
+    backgroundColor: '#FFF1E8',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  distanceText: {
+    color: COLORS.primary,
+    fontWeight: '800',
+    fontSize: 13,
   },
 
-  logHighlight: {
-    color: ACCENT,
-    fontWeight: '700',
-  },
-
-  // ── Encrypted Comms / Terminal ────────────────────────────────────────
-  radarContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-    paddingVertical: 8,
-  },
-
-  radarText: {
-    fontFamily: MONO,
+  footerText: {
+    fontFamily: FONT_FAMILY,
     fontSize: 14,
-    color: TEXT_DIM,
-    lineHeight: 18,
-  },
-
-  terminalBlock: {
-    backgroundColor: '#0A0A0A',
-    borderWidth: 1,
-    borderColor: BORDER,
-    borderRadius: 2,
-    padding: 12,
-  },
-
-  terminalText: {
-    fontFamily: MONO,
-    fontSize: 11,
-    color: TEXT_DIM,
-    lineHeight: 17,
-  },
-
-  // ── Responder Allocation (Agent rows) ─────────────────────────────────
-  agentRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-
-  agentDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 14,
-  },
-
-  agentInfo: {
-    flex: 1,
-  },
-
-  agentCode: {
-    fontFamily: MONO,
-    fontSize: 13,
-    fontWeight: '800',
-    color: TEXT_BRIGHT,
-    letterSpacing: 1,
-  },
-
-  agentName: {
-    fontFamily: MONO,
-    fontSize: 11,
-    color: TEXT_DIM,
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-
-  agentDist: {
-    fontFamily: MONO,
-    fontSize: 13,
-    color: ACCENT,
-    fontWeight: '700',
-  },
-
-  // ── Mission Information ───────────────────────────────────────────────
-  missionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-
-  missionDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 10,
-  },
-
-  missionLabel: {
-    fontFamily: MONO,
-    fontSize: 13,
-    fontWeight: '700',
-    color: TEXT_BRIGHT,
-  },
-
-  missionStats: {
-    marginTop: 4,
-  },
-
-  missionStatRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: BORDER,
-  },
-
-  missionStatRowTotal: {
-    borderBottomWidth: 0,
-    borderTopWidth: 1,
-    borderTopColor: '#2A2A2A',
-    marginTop: 4,
-    paddingTop: 12,
-  },
-
-  missionStatLabel: {
-    fontFamily: MONO,
-    fontSize: 12,
-    color: TEXT_MED,
-  },
-
-  missionStatVal: {
-    fontFamily: MONO,
-    fontSize: 13,
-    fontWeight: '800',
-    color: TEXT_BRIGHT,
-  },
+    textAlign: 'center',
+    color: COLORS.textLight,
+    marginTop: 40,
+    fontStyle: 'italic',
+  }
 });
 
 export default HomeScreen;
